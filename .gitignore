@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Build output
+build/
+dist/
+*.spec
+*.manifest
+
+# Secrets and local data (never commit these)
+.env
+.env.*
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-*
+*.log
+
+# Editors, OS and tools
+.vscode/
+.idea/
+.claude/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.lnk
+
+# Scratch output. Curated screenshots live in docs/screenshots/
+artifacts/
+
+# Original prototype script this project grew from. Not part of the open-source release
+docs/original_user_script.txt
+
+# Internal working notes, kept locally and not published
+docs/FIX_PLAN.md
+docs/IMPLEMENTATION_NOTES.md
