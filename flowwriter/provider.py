@@ -9,6 +9,7 @@ limit, a cap on how much text a reply may contain, and a cap on input size.
 from __future__ import annotations
 from functools import lru_cache
 import json
+import socket
 import secrets
 import threading
 import time
@@ -79,6 +80,23 @@ class _ThinkFilter:
         out = self.buf if self.state != "inside" else ""
         self.buf = ""
         return out
+
+
+def _wake_blocked_reads(client) -> None:
+    """Make a read that is waiting on the network stop now.
+
+    Closing a socket from another thread does not wake a thread blocked in recv() on Linux or
+    macOS (Windows does), so Cancel would wait for the read timeout. shutdown() does wake it.
+    Best effort: it reaches into httpx's pool, and silently does nothing if that layout changes.
+    """
+    try:
+        for connection in client._transport._pool.connections:
+            stream = getattr(getattr(connection, "_connection", None), "_network_stream", None)
+            sock = stream.get_extra_info("socket") if stream is not None else None
+            if sock is not None:
+                sock.shutdown(socket.SHUT_RDWR)
+    except Exception:
+        pass
 
 
 class ChatClient:
@@ -267,6 +285,7 @@ class ChatClient:
                     flags["timeout"] = True
                 else:
                     continue
+                _wake_blocked_reads(client)
                 try:
                     client.close()
                 except Exception:
