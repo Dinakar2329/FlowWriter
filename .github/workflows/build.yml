@@ -36,7 +36,16 @@ jobs:
           python -m pip install --require-hashes -r requirements.lock
           python -m pip install --no-deps -e .
       - name: Unit and offscreen UI tests
-        run: python -m pytest -q tests
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m pytest -q -rfE --tb=short tests 2>&1 | tee pytest.log
+      - name: Show failing tests in the run summary
+        if: failure()
+        shell: bash
+        run: |
+          grep -E "^(FAILED|ERROR)" pytest.log | head -20 | while IFS= read -r line; do echo "::error title=Test failed::${line:0:400}"; done
+          { echo '### Failing tests'; echo '```'; grep -E "^(FAILED|ERROR)" pytest.log | head -40; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
       - name: Package for this OS
         run: python scripts/build_release.py
       # Zipped here, not by upload-artifact, so macOS and Linux keep their executable permissions.
