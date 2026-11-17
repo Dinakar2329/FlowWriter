@@ -343,7 +343,7 @@ def test_changing_shortcuts_applies_without_restart(parts):
     controller.dashboard.save_shortcuts()
     assert controller.shortcuts.drag == frozenset({"alt"})
     assert controller.shortcuts.hotkey == "Ctrl+Shift+K"
-    assert "Alt" in controller.dashboard.shortcut_hint.text()
+    assert shortcuts.drag_label({"alt"}) in controller.dashboard.shortcut_hint.text()      # "Alt", or "Option" on a Mac
     assert shortcuts.load(store) == controller.shortcuts
 
 

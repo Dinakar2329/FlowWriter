@@ -14,14 +14,15 @@ def test_real_http_against_mock():
     )
     try:
         alive = False
-        for _ in range(50):
+        for _ in range(200):                      # up to about 20 s: a CI runner can start Python slowly
+            assert proc.poll() is None, "the mock server exited before it started listening"
             try:
-                with socket.create_connection(("127.0.0.1", 8765), timeout=0.2):
+                with socket.create_connection(("127.0.0.1", 8765), timeout=0.5):
                     alive = True
                     break
             except OSError:
-                time.sleep(0.04)
-        assert alive
+                time.sleep(0.1)
+        assert alive, "the mock server did not start listening within 20 seconds"
         for stream in (False, True):
             profile = Provider("mock", "Mock", "http://127.0.0.1:8765/v1", "mock-text-model", stream)
             text = ChatClient().generate(profile, "", "Summarize", "Some test words")

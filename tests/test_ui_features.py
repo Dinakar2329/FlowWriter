@@ -208,7 +208,7 @@ def test_shortcuts_page_saves_validates_and_resets(dashboard, qt_app, monkeypatc
     monkeypatch.setattr(MessageBox, "warning", classmethod(lambda cls, *a, **k: warned.append(a[2])))
     dashboard.navigate(7)
     flush_ui(qt_app)
-    assert dashboard.drag_choice.currentData() == "ctrl"
+    assert dashboard.drag_choice.currentData() == shortcuts.PRIMARY     # Ctrl on Windows/Linux, Cmd on a Mac
     assert dashboard.hotkey_edit.keySequence().toString(QKeySequence.PortableText) == "Ctrl+Alt+Space"
     changed = QSignalSpy(dashboard.shortcuts_changed)
     dashboard.hotkey_edit.setKeySequence(QKeySequence("Ctrl+C"))
@@ -220,7 +220,7 @@ def test_shortcuts_page_saves_validates_and_resets(dashboard, qt_app, monkeypatc
     dashboard.save_shortcuts()
     saved = shortcuts.load(dashboard.store)
     assert changed.count() >= 1 and saved.drag == frozenset({"alt"}) and saved.hotkey == ""   # the drag change also saved by itself
-    assert "Alt" in dashboard.shortcut_hint.text()
+    assert shortcuts.drag_label({"alt"}) in dashboard.shortcut_hint.text()      # "Alt", or "Option" on a Mac
     dashboard.reset_shortcuts()
     assert shortcuts.load(dashboard.store) == shortcuts.Shortcuts()
     assert dashboard.hotkey_edit.keySequence().toString(QKeySequence.PortableText) == "Ctrl+Alt+Space"
